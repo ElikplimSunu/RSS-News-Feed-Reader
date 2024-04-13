@@ -1,7 +1,5 @@
-package com.sunueric.newsrssfeedapp
+package com.sunueric.newsrssfeedapp.ui.screens
 
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.content.res.Configuration.UI_MODE_TYPE_NORMAL
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,8 +34,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -47,9 +42,8 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Text
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.sunueric.newsrssfeedapp.R
 import com.sunueric.newsrssfeedapp.data.network.models.Item
-import com.sunueric.newsrssfeedapp.data.network.repositories.parseRssFeed
-import com.sunueric.newsrssfeedapp.ui.theme.NewsRSSFeedAppTheme
 import com.sunueric.newsrssfeedapp.utils.calculateTimeAgo
 import com.sunueric.newsrssfeedapp.utils.parseDateTime
 import kotlinx.coroutines.delay
@@ -302,46 +296,5 @@ fun NewsItem(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun NewsFeed() {
-    var articles by remember { mutableStateOf<List<Item>?>(null) }
-
-    // Fetch RSS feed
-    LaunchedEffect(key1 = Unit) {
-        try {
-            val response = RetrofitInstance.rssService.fetchRssFeedAsString()
-            val feedString = response.string() // Get the raw XML string
-            articles = parseRssFeed(feedString) // Parse it
-        } catch (e: Exception) {
-            Log.e("RSS Fetch Error", "Failed to fetch RSS feed: $e", e)
-        }
-    }
-
-    articles?.let {
-        NewsItem("https://static01.nyt.com/images/misc/NYT_logo_rss_250x40.png", "Arts", it)
-    } ?: run {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(
-                color = Color.White,
-                trackColor = Color.White.copy(alpha = 0.25f)
-            )
-        }
-    }
-}
-
-
-@Preview(
-    showBackground = true,
-    uiMode = UI_MODE_TYPE_NORMAL or UI_MODE_NIGHT_YES,
-    device = Devices.TV_720p)
-@Composable
-fun PreviewNewsFeed() {
-    NewsRSSFeedAppTheme {
-        NewsItem("random", "Arts", emptyList())
     }
 }

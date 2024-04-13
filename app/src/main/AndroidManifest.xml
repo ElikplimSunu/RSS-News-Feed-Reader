@@ -12,6 +12,7 @@
 
     <application
         android:allowBackup="true"
+        android:name=".NewsApp"
         android:banner="@mipmap/ic_launcher"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
