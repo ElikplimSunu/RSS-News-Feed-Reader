@@ -45,13 +45,3 @@ fun NewsFeed() {
 }
 
 
-@Preview(
-    showBackground = true,
-    uiMode = UI_MODE_TYPE_NORMAL or UI_MODE_NIGHT_YES,
-    device = Devices.TV_720p)
-@Composable
-fun PreviewNewsFeed() {
-    NewsRSSFeedAppTheme {
-        NewsItem("random", "Arts", emptyList())
-    }
-}

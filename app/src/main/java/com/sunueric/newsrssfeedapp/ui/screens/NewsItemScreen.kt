@@ -1,5 +1,8 @@
 package com.sunueric.newsrssfeedapp.ui.screens
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.content.res.Configuration.UI_MODE_TYPE_NORMAL
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -9,10 +12,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
@@ -30,10 +36,13 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -44,7 +53,9 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.sunueric.newsrssfeedapp.R
 import com.sunueric.newsrssfeedapp.data.network.models.Item
+import com.sunueric.newsrssfeedapp.ui.theme.NewsRSSFeedAppTheme
 import com.sunueric.newsrssfeedapp.utils.calculateTimeAgo
+import com.sunueric.newsrssfeedapp.utils.generateQRCode
 import com.sunueric.newsrssfeedapp.utils.parseDateTime
 import kotlinx.coroutines.delay
 
@@ -65,6 +76,7 @@ fun NewsItem(
     val alpha = remember {
         Animatable(0f)
     }
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     val placeholder = R.drawable.placeholder_arts
 
@@ -105,11 +117,13 @@ fun NewsItem(
         newsDescriptionText = article.description ?: ""
         newsTitleText = article.title ?: ""
         newsThumbnailUrl = article.imageUrl.toString()
+        bitmap = generateQRCode(article.articleLink ?: "")
         val pastDateTime = parseDateTime(article.publicationDate ?: "")
         val timeAgo = calculateTimeAgo(pastDateTime)
         pubDate = timeAgo
         Log.d("NewsItem", "newsTitleText: $newsTitleText")
         Log.d("NewsItem", "newsDescriptionText: $newsDescriptionText")
+        Log.d("NewsItem", "article link: ${article.articleLink}")
         Log.d(
             "NewsItem",
             "newsThumbnailUrl: $newsThumbnailUrl, news thumbnail url from object: ${article.imageUrl}"
@@ -164,7 +178,8 @@ fun NewsItem(
                     newsCategoryContainer,
                     newsTitle,
                     displayProgress,
-                    timePosted
+                    timePosted,
+                    qrCode
                 ) = createRefs()
                 Image(
                     modifier = Modifier
@@ -280,21 +295,48 @@ fun NewsItem(
                     )
                 )
 
-                Text(
-                    modifier = Modifier.constrainAs(newsDescription) {
-                        top.linkTo(newsThumbnail.bottom)
-                        start.linkTo(parent.start)
-                        bottom.linkTo(parent.bottom)
-                        end.linkTo(parent.end)
-                        width = Dimension.fillToConstraints
-                    },
-                    text = newsDescriptionText,
-                    style = TextStyle(
-                        fontSize = 28.sp,
-                        color = Color.White
+                    Text(
+                        modifier = Modifier
+                            .constrainAs(newsDescription) {
+                            top.linkTo(newsThumbnail.bottom)
+                            start.linkTo(parent.start)
+                            bottom.linkTo(parent.bottom)
+                        },
+                        text = newsDescriptionText,
+                        style = TextStyle(
+                            fontSize = 26.sp,
+                            color = Color.White
+                        )
                     )
-                )
-            }
+
+                    bitmap?.let {
+                        Image(
+                            bitmap = it.asImageBitmap(),
+                            contentDescription = "QR Code",
+                            modifier = Modifier
+                                .constrainAs(qrCode) {
+                                    top.linkTo(newsThumbnail.bottom)
+                                    start.linkTo(newsDescription.end)
+                                    end.linkTo(parent.end)
+                                    bottom.linkTo(parent.bottom)
+                                }
+                                .padding(start = 20.dp)
+                                .size(120.dp)
+                                .aspectRatio(1f)
+                        )
+                    }
+                }
         }
+    }
+}
+
+@Preview(
+    showBackground = true,
+    uiMode = UI_MODE_TYPE_NORMAL or UI_MODE_NIGHT_YES,
+    device = Devices.TV_720p)
+@Composable
+fun PreviewNewsFeed() {
+    NewsRSSFeedAppTheme {
+        NewsItem("random", "Arts", emptyList())
     }
 }
