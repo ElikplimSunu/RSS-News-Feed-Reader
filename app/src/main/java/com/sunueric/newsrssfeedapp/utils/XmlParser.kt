@@ -49,7 +49,7 @@ private fun readItem(parser: XmlPullParser): Item {
 
         when (parser.name) {
             "title" -> title = readText(parser)
-            "link" -> link = readText(parser)
+            "link" -> if (link == null) link = readText(parser)
             "description" -> description = readText(parser)
             "pubDate" -> publicationDate = readText(parser)
             "content" -> {
@@ -57,8 +57,9 @@ private fun readItem(parser: XmlPullParser): Item {
                 skip(parser)
             }
         }
+        Log.d("XmlParser", "parser name: ${parser.name}")
     }
-    Log.d("NewsFeed", "new thumbnail url: $imageUrl")
+    Log.d("XmlParser", "article link: $link")
 
     return Item(title ?: "", link ?: "", description ?: "", publicationDate ?: "", imageUrl ?: "")
 }
